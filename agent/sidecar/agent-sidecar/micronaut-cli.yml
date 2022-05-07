@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: cz.strazovan.cvut.fel.diploma.agent.sidecar
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [app-name, graalvm, http-client, jackson-databind, java, java-application, junit, logback, management, maven, micrometer, micrometer-prometheus, netty-server, rabbitmq, reactor, reactor-http-client, readme, shade, yaml]

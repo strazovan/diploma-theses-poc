@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: test-rabbitmq
+    networks:
+      - network
+    expose:
+      - 5672
+    ports:
+      - 15672:15672
+    restart: on-failure
+
+  app:
+    container_name: ping-test
+    image: ping-agent
+    networks:
+      - network
+    environment:
+      EPHEMERAL: 'false'
+      JOB_SCRIPT_PATH: '/scripts/ping.py'
+      JOBS_DESCRIPTIONS_FOLDER: '/jobs/descriptions'
+      JOBS_OUTPUTS_FOLDER: '/jobs/results'
+      MESSAGE_BOX_EXCHANGE: 'test-box-1-exchange'
+      RABBIT_MQ_ADDRESS: 'amqp://test-rabbitmq:5672'
+    ports:
+      - 8080:8080
+    depends_on:
+      - rabbit-mq
+    restart: on-failure
+
+networks:
+  network:
+    driver: bridge

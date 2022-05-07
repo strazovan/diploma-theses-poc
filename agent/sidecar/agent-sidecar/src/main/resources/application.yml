@@ -1,0 +1,22 @@
+micronaut:
+  application:
+    name: agentSidecar
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        descriptions: true
+        step: PT1M
+netty:
+  default:
+    allocator:
+      max-order: 3
+rabbitmq.uri: ${RABBIT_MQ_ADDRESS}
+
+messagebox.exchange: ${MESSAGE_BOX_EXCHANGE}
+
+jobs.descriptions: ${JOBS_DESCRIPTIONS_FOLDER}
+jobs.outputs: ${JOBS_OUTPUTS_FOLDER}
+job.script.path: ${JOB_SCRIPT_PATH}
+ephemeral: ${EPHEMERAL}
