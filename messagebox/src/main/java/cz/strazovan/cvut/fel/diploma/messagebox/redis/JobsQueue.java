@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,7 +35,7 @@ public class JobsQueue implements InitializingBean {
     }
 
     public String getJobForAgent() {
-        final String jobs = this.listOps.leftPop("jobs");
+        final String jobs = this.listOps.leftPop("jobs", Duration.ofHours(24));
         this.queueSize.set(Objects.requireNonNull(this.listOps.size("jobs")));
         return jobs;
     }

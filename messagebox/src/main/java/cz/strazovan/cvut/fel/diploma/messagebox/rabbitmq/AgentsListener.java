@@ -62,6 +62,10 @@ public class AgentsListener implements SmartLifecycle {
                 // this is async because me might have to wait for a job to appear
                 logger.info("Trying to retrieve a job");
                 final String job = this.jobsQueue.getJobForAgent();
+                if (job == null) {
+                    logger.warn("job is null");
+                    return;
+                }
                 logger.info("Sending job to the agent");
                 this.rabbitTemplate.convertAndSend(replyTo, job, message -> {
                     message.getMessageProperties().setHeader("x-jobid", UUID.randomUUID().toString());
