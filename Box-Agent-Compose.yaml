@@ -1,0 +1,92 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres
+    container_name: test-postgres
+    environment:
+      POSTGRES_USER: messagebox_db
+      POSTGRES_PASSWORD: messagebox_db
+      POSTGRES_DB: messagebox_db
+    expose:
+      - 5432
+    networks:
+      - network
+    restart: unless-stopped
+
+  rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: test-rabbitmq
+    networks:
+      - network
+    expose:
+      - 5672
+    ports:
+      - 15672:15672
+    restart: on-failure
+
+  redis:
+    image: redis
+    container_name: test-redis
+    expose:
+      - 6379
+    networks:
+      - network
+    restart: on-failure
+
+  app:
+    container_name: message-box-test
+    image: system-messagebox
+    networks:
+      - network
+    environment:
+      APP_PORT: '18080'
+      DB_DDLGENERATION: 'drop-and-create-tables'
+      DB_DRIVER: 'org.postgresql.Driver'
+      DB_PASSWORD: 'messagebox_db'
+      DB_PLATFORM: 'org.eclipse.persistence.platform.database.PostgreSQLPlatform'
+      DB_URL: 'jdbc:postgresql://postgres:5432/messagebox_db'
+      DB_USERNAME: 'messagebox_db'
+      RABBIT_MQ_AGENTS_EXCHANGE: 'messagebox-1-exchange'
+      RABBIT_MQ_AGENTS_RESULTS_QUEUE: 'messagebox-1-results'
+      RABBIT_MQ_HOST: 'rabbit-mq'
+      RABBIT_MQ_INCOMING_JOBS_QUEUE: 'jobs.ping.queue'
+      RABBIT_MQ_INCOMING_JOBS_ROUTING_KEY: 'jobs.ping'
+      RABBIT_MQ_JOBS_EXCHANGE: 'jobs-exchange'
+      RABBIT_MQ_JOBS_RESULTS_EXCHANGE: 'jobs.ping.results'
+      RABBIT_MQ_PORT: '5672'
+      REDIS_HOSTNAME: 'redis'
+      REDIS_PORT: '6379'
+      JOB_TYPE: 'ping'
+    ports:
+      - 18080:18080
+    depends_on:
+      - rabbit-mq
+      - redis
+      - postgres
+    restart: on-failure
+
+  pingageng:
+    container_name: ping-test
+    image: ping-agent
+    networks:
+      - network
+    environment:
+      EPHEMERAL: 'false'
+      JOB_SCRIPT_PATH: '/scripts/ping.py'
+      JOBS_DESCRIPTIONS_FOLDER: '/jobs/descriptions'
+      JOBS_OUTPUTS_FOLDER: '/jobs/results'
+      MESSAGE_BOX_EXCHANGE: 'messagebox-1-exchange'
+      RABBIT_MQ_ADDRESS: 'amqp://rabbit-mq:5672'
+      MESSAGE_BOX_JOBS_QUEUE: 'ping.agents.jobs'
+    ports:
+      - 8080:8080
+    depends_on:
+      - rabbit-mq
+    restart: on-failure
+
+
+networks:
+  network:
+    driver: bridge
