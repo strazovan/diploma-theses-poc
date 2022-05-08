@@ -41,7 +41,7 @@ public class RabbitMqConfig {
 
     @Bean(name = "agentsExchange")
     public DirectExchange agentsExchange() {
-        return new DirectExchange(this.agentsExchange, true, true);
+        return new DirectExchange(this.agentsExchange, true, false);
     }
 
     @Bean(name = "incomingJobsQueue")
