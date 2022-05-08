@@ -24,6 +24,9 @@ public class StartupListener implements ApplicationEventListener<ServerStartupEv
     @Value("${messagebox.exchange}")
     protected String exchangeName;
 
+    @Value("${messagebox.jobs.queue}")
+    protected String jobsQueue;
+
     @Value("${jobs.descriptions}")
     protected String jobsDescriptionsFolder;
     @Value("${jobs.outputs}")
@@ -48,9 +51,9 @@ public class StartupListener implements ApplicationEventListener<ServerStartupEv
 
             channel = this.connection.createChannel();
             channel.exchangeDeclare(exchangeName, BuiltinExchangeType.DIRECT, true);
-            final AMQP.Queue.DeclareOk queueDeclare = channel.queueDeclare("", false, false, true, null);
+            final AMQP.Queue.DeclareOk queueDeclare = channel.queueDeclare(this.jobsQueue, false, false, true, null);
             channel.queueBind(queueDeclare.getQueue(), exchangeName, exchangeName + queueDeclare.getQueue());
-            logger.info("Created anonymous queue {}", queueDeclare.getQueue());
+            logger.info("Created queue {}", queueDeclare.getQueue());
             final RabbitMQMessageBoxClient client = new RabbitMQMessageBoxClient(channel, queueDeclare.getQueue(), exchangeName);
             channel.basicConsume(queueDeclare.getQueue(), new QueueConsumer(channel, jobsDescriptionsFolder, jobsOutputFolder, jobScriptPath, client, inactivityController, meterRegistry));
             client.askForJob();

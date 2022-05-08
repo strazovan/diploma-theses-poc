@@ -15,6 +15,7 @@ netty:
 rabbitmq.uri: ${RABBIT_MQ_ADDRESS}
 
 messagebox.exchange: ${MESSAGE_BOX_EXCHANGE}
+messagebox.jobs.queue: ${MESSAGE_BOX_JOBS_QUEUE}
 
 jobs.descriptions: ${JOBS_DESCRIPTIONS_FOLDER}
 jobs.outputs: ${JOBS_OUTPUTS_FOLDER}
