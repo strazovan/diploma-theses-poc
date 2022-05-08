@@ -74,6 +74,7 @@ public class AgentsListener implements SmartLifecycle {
             });
         } else {
             // agent sends result
+            logger.info("Sending result {} to {}", payload, this.jobResultsExchange);
             this.rabbitTemplate.convertAndSend(this.jobResultsExchange, "", payload);
         }
     }
