@@ -24,6 +24,7 @@ services:
       JOBS_OUTPUTS_FOLDER: '/jobs/results'
       MESSAGE_BOX_EXCHANGE: 'test-box-1-exchange'
       RABBIT_MQ_ADDRESS: 'amqp://test-rabbitmq:5672'
+      MESSAGE_BOX_JOBS_QUEUE: 'ping.agents.jobs'
     ports:
       - 8080:8080
     depends_on:
