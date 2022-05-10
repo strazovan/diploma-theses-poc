@@ -26,6 +26,9 @@ public class Scrapper implements SmartLifecycle {
     @Value("${metric.limit}")
     private Float metricLimit;
 
+    @Value("${prometheus.baseurl}")
+    private String prometheusBaseUrl;
+
     private ScheduledExecutorService scrapper;
 
     private final KubernetesClient kubernetesClient;
@@ -57,7 +60,7 @@ public class Scrapper implements SmartLifecycle {
         public void run() {
             logger.info("Scraping...");
             final RestTemplate template = new RestTemplate();
-            final ResponseEntity<VectorResponse> response = template.getForEntity("http://localhost:9090/api/v1/query?query=" + metricName, VectorResponse.class);
+            final ResponseEntity<VectorResponse> response = template.getForEntity(prometheusBaseUrl + "/api/v1/query?query=" + metricName, VectorResponse.class);
             final VectorResponse body = response.getBody();
             final List<VectorResponse.VectorResult> result = body.getData().getResult();
             final VectorResponse.VectorResult metric = result.stream().filter(vectorResult -> vectorResult.getMetric().get("__name__").equals(metricName)).findFirst().orElseThrow();
