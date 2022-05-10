@@ -19,6 +19,10 @@ public class KubernetesClient {
 
     @Value("${rabbitmq.address}")
     private String rabbitMQAddress;
+    @Value("${rabbitmq.username}")
+    private String rabbitMQUsername;
+    @Value("${rabbitmq.password}")
+    private String rabbitMQPassword;
 
     @Value("${messagebox.exchange}")
     private String messageBoxExchange;
@@ -57,6 +61,8 @@ public class KubernetesClient {
                             new EnvVarBuilder().withName("JOBS_OUTPUTS_FOLDER").withValue("/jobs/results").build(),
                             new EnvVarBuilder().withName("MESSAGE_BOX_EXCHANGE").withValue(this.messageBoxExchange).build(),
                             new EnvVarBuilder().withName("RABBIT_MQ_ADDRESS").withValue(this.rabbitMQAddress).build(),
+                            new EnvVarBuilder().withName("RABBITMQ_USERNAME").withValue(this.rabbitMQUsername).build(),
+                            new EnvVarBuilder().withName("RABBITMQ_PASSWORD").withValue(this.rabbitMQPassword).build(),
                             new EnvVarBuilder().withName("MESSAGE_BOX_JOBS_QUEUE").withValue(this.messageBoxJobsQueue).build()
                     )
                     .endContainer()
