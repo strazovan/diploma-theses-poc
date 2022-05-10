@@ -1,0 +1,17 @@
+---
+grafana:
+ ingress:
+  enabled: true
+  ingressClassName: nginx
+  hosts:
+   - grafana.kube.local
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-fs-storage
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

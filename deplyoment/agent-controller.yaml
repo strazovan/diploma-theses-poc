@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-controller-deplyoment
+  labels:
+    app: poc-agentcontroller-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poc-agentcontroller-app
+  template:
+    metadata:
+      labels:
+        app: poc-agentcontroller-app
+    spec:
+      containers:
+        - name: agent-controller
+          image: agent-controller
+          imagePullPolicy: Never # this is here just because this is a local image
+          env:
+           - name: MESSAGE_BOX_EXCHANGE
+             value: "messagebox-1-exchange"
+           - name: MESSAGE_BOX_JOBS_QUEUE
+             value: "ping.agents.jobs"
+           - name: METRIC_LIMIT
+             value: "5.0"
+           - name: METRIC_NAME
+             value: "ping_queue_size"
+           - name: RABBITMQ_ADDRESS
+             value: "amqp://rabbit-mq-test-cluster:5672"
+           - name: RABBITMQ_USERNAME
+             value: "test-user"
+           - name: RABBITMQ_PASSWORD
+             value: "test-password"
+           - name: PROMETHEUS_BASE_URL
+             value: "http://prometheus-operated:9090"
+          ports:
+            - containerPort: 8080
+
+--- # service
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-controller-service
+  labels:
+    app: poc-agentcontroller-app
+spec:
+  selector:
+    app: poc-agentcontroller-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

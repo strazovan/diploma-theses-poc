@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-messagebox-deplyoment
+  labels:
+    app: poc-messagebox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poc-messagebox
+  template:
+    metadata:
+      labels:
+        app: poc-messagebox
+    spec:
+      containers:
+        - name: poc-messagebox
+          image: system-messagebox
+          imagePullPolicy: Never # this is here just because this is a local image
+          env:
+          - name: "APP_PORT"
+            value: "18080"
+          - name: "DB_DDLGENERATION"
+            value: "drop-and-create-tables"
+          - name: "DB_DRIVER"
+            value: "org.postgresql.Driver"
+          - name: "DB_PASSWORD"
+            value: "messagebox_db"
+          - name: "DB_PLATFORM"
+            value: "org.eclipse.persistence.platform.database.PostgreSQLPlatform"
+          - name: "DB_URL"
+            value: "jdbc:postgresql://localhost:5432/messagebox_db"
+          - name: "DB_USERNAME"
+            value: "messagebox_db"
+          - name: "RABBIT_MQ_AGENTS_EXCHANGE"
+            value: "messagebox-1-exchange"
+          - name: "RABBIT_MQ_AGENTS_RESULTS_QUEUE"
+            value: "messagebox-1-results"
+          - name: "RABBIT_MQ_HOST"
+            value: "rabbit-mq-test-cluster"
+          - name: "RABBIT_MQ_USERNAME"
+            value: "test-user"
+          - name: "RABBIT_MQ_PASSWORD"
+            value: "test-password"
+          - name: "RABBIT_MQ_INCOMING_JOBS_QUEUE"
+            value: "jobs.ping.queue"
+          - name: "RABBIT_MQ_INCOMING_JOBS_ROUTING_KEY"
+            value: "jobs.ping"
+          - name: "RABBIT_MQ_JOBS_EXCHANGE"
+            value: "jobs-exchange"
+          - name: "RABBIT_MQ_JOBS_RESULTS_EXCHANGE"
+            value: "jobs.ping.results"
+          - name: "RABBIT_MQ_PORT"
+            value: "5672"
+          - name: "REDIS_HOSTNAME"
+            value: "localhost"
+          - name: "REDIS_PORT"
+            value: "6379"
+          - name: "JOB_TYPE"
+            value: "ping"
+          ports:
+            - containerPort: 18080
+        - name: box-redis
+          image: redis
+          ports:
+            - containerPort: 6379
+        - name: box-postgres
+          image: postgres
+          env:
+          - name: "POSTGRES_USER"
+            value: "messagebox_db"
+          - name: "POSTGRES_PASSWORD"
+            value: "messagebox_db"
+          - name: "POSTGRES_DB"
+            value: "messagebox_db"
+          ports:
+            - containerPort: 5432
+
+
+--- # service
+apiVersion: v1
+kind: Service
+metadata:
+  name: poc-messagebox-service
+  labels:
+    app: poc-messagebox
+spec:
+  selector:
+    app: poc-messagebox
+  ports:
+    - protocol: TCP
+      port: 18080
+      targetPort: 18080
+--- # service monitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: test-app-service-monitor
+  labels:
+    release: prometheus-grafana-test
+spec:
+  endpoints:
+    - interval: 10s
+      targetPort: 18080
+      path: /actuator/prometheus
+  selector:
+    matchLabels:
+      app: poc-messagebox

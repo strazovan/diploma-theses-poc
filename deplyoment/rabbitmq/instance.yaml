@@ -1,0 +1,25 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbit-mq-test-cluster
+  labels:
+    app: rabbit-mq-test-cluster
+spec:
+  replicas: 1
+  persistence:
+    storageClassName: local-fs-storage
+    storage: "1Gi"
+--- # service monitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rabbit-mq-test-cluster-service-monitor
+  labels:
+    release: prometheus-grafana-test
+spec:
+  endpoints:
+    - interval: 10s
+      targetPort: 15692
+  selector:
+    matchLabels:
+      app: rabbit-mq-test-cluster
