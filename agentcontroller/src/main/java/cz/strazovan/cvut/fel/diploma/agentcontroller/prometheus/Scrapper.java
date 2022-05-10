@@ -58,18 +58,22 @@ public class Scrapper implements SmartLifecycle {
     private class ScrapeJob implements Runnable {
         @Override
         public void run() {
-            logger.info("Scraping...");
-            final RestTemplate template = new RestTemplate();
-            final ResponseEntity<VectorResponse> response = template.getForEntity(prometheusBaseUrl + "/api/v1/query?query=" + metricName, VectorResponse.class);
-            final VectorResponse body = response.getBody();
-            final List<VectorResponse.VectorResult> result = body.getData().getResult();
-            final VectorResponse.VectorResult metric = result.stream().filter(vectorResult -> vectorResult.getMetric().get("__name__").equals(metricName)).findFirst().orElseThrow();
-            if (metric.getValue().size() > 0) {
-                final Float value = metric.getValue().get(0);
-                logger.info("{} value is {}", metricName, value);
-                if (value > metricLimit) {
-                    kubernetesClient.runJob();
+            try {
+                logger.info("Scraping...");
+                final RestTemplate template = new RestTemplate();
+                final ResponseEntity<VectorResponse> response = template.getForEntity(prometheusBaseUrl + "/api/v1/query?query=" + metricName, VectorResponse.class);
+                final VectorResponse body = response.getBody();
+                final List<VectorResponse.VectorResult> result = body.getData().getResult();
+                final VectorResponse.VectorResult metric = result.stream().filter(vectorResult -> vectorResult.getMetric().get("__name__").equals(metricName)).findFirst().orElseThrow();
+                if (metric.getValue().size() > 0) {
+                    final Float value = metric.getValue().get(0);
+                    logger.info("{} value is {}", metricName, value);
+                    if (value > metricLimit) {
+                        kubernetesClient.runJob();
+                    }
                 }
+            } catch (Exception e) {
+                logger.error("Failed", e);
             }
         }
     }
