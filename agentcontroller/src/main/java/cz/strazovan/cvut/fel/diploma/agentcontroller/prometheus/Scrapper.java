@@ -65,8 +65,8 @@ public class Scrapper implements SmartLifecycle {
                 final VectorResponse body = response.getBody();
                 final List<VectorResponse.VectorResult> result = body.getData().getResult();
                 final VectorResponse.VectorResult metric = result.stream().filter(vectorResult -> vectorResult.getMetric().get("__name__").equals(metricName)).findFirst().orElseThrow();
-                if (metric.getValue().size() > 0) {
-                    final Float value = metric.getValue().get(0);
+                if (metric.getValue().size() > 1) {
+                    final Float value = metric.getValue().get(1);
                     logger.info("{} value is {}", metricName, value);
                     if (value > metricLimit) {
                         kubernetesClient.runJob();
