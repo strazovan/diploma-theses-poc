@@ -21,3 +21,6 @@ jobs.descriptions: ${JOBS_DESCRIPTIONS_FOLDER}
 jobs.outputs: ${JOBS_OUTPUTS_FOLDER}
 job.script.path: ${JOB_SCRIPT_PATH}
 ephemeral: ${EPHEMERAL}
+rabbitmq:
+  username: ${RABBITMQ_USERNAME}
+  password: ${RABBITMQ_PASSWORD}
