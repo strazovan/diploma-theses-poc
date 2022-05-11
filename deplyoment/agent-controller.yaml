@@ -52,3 +52,18 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+--- # service monitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ac-service-monitor
+  labels:
+    release: prometheus-grafana-test
+spec:
+  endpoints:
+    - interval: 10s
+      targetPort: 8080
+      path: /actuator/prometheus
+  selector:
+    matchLabels:
+      app: poc-agentcontroller-app
