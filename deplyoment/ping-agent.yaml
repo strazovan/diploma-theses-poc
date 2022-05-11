@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ping-agent-deplyoment
+  labels:
+    app: poc-pingagent-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poc-pingagent-app
+  template:
+    metadata:
+      labels:
+        app: poc-pingagent-app
+    spec:
+      containers:
+        - name: ping-agent
+          image: ping-agent
+          imagePullPolicy: Never # this is here just because this is a local image
+          env:
+           - name: EPHEMERAL
+             value: "false"
+           - name: JOB_SCRIPT_PATH
+             value: "/scripts/ping.py"
+           - name: JOBS_DESCRIPTIONS_FOLDER
+             value: "/jobs/descriptions"
+           - name: JOBS_OUTPUTS_FOLDER
+             value: "/jobs/results"
+           - name: MESSAGE_BOX_EXCHANGE
+             value: "messagebox-1-exchange"
+           - name: RABBIT_MQ_ADDRESS
+             value: "amqp://rabbit-mq-test-cluster:5672"
+           - name: RABBITMQ_USERNAME
+             value: "test-user"
+           - name: RABBITMQ_PASSWORD
+             value: "test-password"
+           - name: MESSAGE_BOX_JOBS_QUEUE
+             value: "ping.agents.jobs"
+          ports:
+            - containerPort: 8080
+
+--- # service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping-agent-service
+  labels:
+    app: poc-pingagent-app
+spec:
+  selector:
+    app: poc-pingagent-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
