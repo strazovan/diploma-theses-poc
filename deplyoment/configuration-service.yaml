@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configuration-service-deplyoment
+  labels:
+    app: poc-configservice-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poc-configservice-app
+  template:
+    metadata:
+      labels:
+        app: poc-configservice-app
+    spec:
+      containers:
+        - name: configuration-service
+          image: configuration-service
+          imagePullPolicy: Never # this is here just because this is a local image
+          env:
+           - name: SERVER_PORT
+             value: "18080"
+          ports:
+            - containerPort: 18080
+
+--- # service
+apiVersion: v1
+kind: Service
+metadata:
+  name: configuration-service-service
+  labels:
+    app: poc-configservice-app
+spec:
+  selector:
+    app: poc-configservice-app
+  ports:
+    - protocol: TCP
+      port: 18080
+      targetPort: 18080
