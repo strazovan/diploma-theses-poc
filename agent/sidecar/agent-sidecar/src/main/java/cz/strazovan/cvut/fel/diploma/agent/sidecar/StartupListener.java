@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Singleton
 public class StartupListener implements ApplicationEventListener<ServerStartupEvent> {
@@ -35,11 +36,17 @@ public class StartupListener implements ApplicationEventListener<ServerStartupEv
     @Value("${job.script.path}")
     protected String jobScriptPath;
 
+    @Value("${agent.uniqueName}")
+    protected String agentsIdentifier;
+
     @Inject
     private Connection connection;
 
     @Inject
     private InactivityController inactivityController;
+
+    @Inject
+    private HeartbeatProducer hbProducer;
 
     @Inject
     private MeterRegistry meterRegistry;
@@ -54,7 +61,8 @@ public class StartupListener implements ApplicationEventListener<ServerStartupEv
             final AMQP.Queue.DeclareOk queueDeclare = channel.queueDeclare(this.jobsQueue, false, false, true, null);
             channel.queueBind(queueDeclare.getQueue(), exchangeName, exchangeName + queueDeclare.getQueue());
             logger.info("Created queue {}", queueDeclare.getQueue());
-            final RabbitMQMessageBoxClient client = new RabbitMQMessageBoxClient(channel, queueDeclare.getQueue(), exchangeName);
+            final RabbitMQMessageBoxClient client = new RabbitMQMessageBoxClient(this.agentsIdentifier + new Date().getTime(), channel, queueDeclare.getQueue(), exchangeName);
+            this.hbProducer.setClient(client);
             channel.basicConsume(queueDeclare.getQueue(), new QueueConsumer(channel, jobsDescriptionsFolder, jobsOutputFolder, jobScriptPath, client, inactivityController, meterRegistry));
             client.askForJob();
         } catch (IOException e) {

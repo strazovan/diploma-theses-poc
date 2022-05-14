@@ -37,6 +37,10 @@ spec:
              value: "test-password"
            - name: MESSAGE_BOX_JOBS_QUEUE
              value: "ping.agents.jobs"
+           - name: AGENT_UNIQUE_NAME
+             valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           ports:
             - containerPort: 8080
 

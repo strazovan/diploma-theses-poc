@@ -6,4 +6,6 @@ public interface MessageBoxClient {
     void askForJob();
 
     void sendResult(String jobId, byte[] result);
+
+    void sendHeartbeat();
 }

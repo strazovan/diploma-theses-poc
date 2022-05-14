@@ -40,7 +40,12 @@ public class QueueConsumer extends DefaultConsumer {
         this.inactivityController.notifyJob();
         this.meterRegistry.counter("received_jobs").increment();
         final String jobId = properties.getHeaders().get("x-jobid").toString();
-        logger.info(new String(body));
+        final String bodyAsString = new String(body);
+        logger.info(bodyAsString);
+        if (bodyAsString.contains("swallow")) {
+            logger.info("Job swallowed.");
+            return;
+        }
         final String descriptionFile = this.jobsDescriptionsFolder + "/" + jobId + ".json";
         final String outputFolder = this.jobsOutputFolder + "/" + jobId;
         new File(outputFolder).mkdir();
