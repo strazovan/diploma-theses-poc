@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qa-9-spam-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: qa-9-spam-cont
+        image: qa-9-spam
+        imagePullPolicy: Never # this is here just because this is a local image
+        env:
+         - name: RABBITMQ_USERNAME
+           value: "test-user"
+         - name: RABBITMQ_PASSWORD
+           value: "test-password"
+         - name: RABBITMQ_HOST
+           value: "rabbit-mq-test-cluster"
+         - name: RABBITMQ_PORT
+           value: "5672"
+      restartPolicy: Never
+  backoffLimit: 4
